@@ -1,0 +1,80 @@
+.rrq-modal {
+	width: min(920px, 95vw);
+}
+
+.rrq-modal .modal-content {
+	overflow-y: auto;
+	max-height: 75vh;
+}
+
+.rrq-intro {
+	font-size: 1.08em;
+}
+
+.rrq-source, .rrq-maps, .rrq-actions, .rrq-item-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.rrq-source label, .rrq-maps label {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.rrq-source select {
+	max-width: 360px;
+}
+
+.rrq-maps {
+	margin: 16px 0;
+}
+
+.rrq-actions {
+	margin: 12px 0;
+}
+
+.rrq-muted {
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+.rrq-file {
+	padding: 10px;
+	background: var(--background-secondary);
+	border-radius: 6px;
+}
+
+.rrq-warning, .rrq-error {
+	color: var(--text-error);
+	padding: 8px;
+	border-left: 3px solid var(--text-error);
+}
+
+.rrq-item {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 14px;
+	margin: 12px 0;
+}
+
+.rrq-item-head a {
+	font-weight: 600;
+}
+
+.rrq-item p {
+	margin: 6px 0;
+}
+
+.rrq-item dd {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	margin-bottom: 8px;
+}
+
+.rrq-item dt {
+	color: var(--text-muted);
+	font-weight: 600;
+}

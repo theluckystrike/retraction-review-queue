@@ -1,0 +1,68 @@
+[
+  {
+    "feature": "column-map",
+    "caption": "Select the paper DOI column of a local notice list.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.settings.checked = {}; await p.saveSettings(); p.pro.signOut(); p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); return 'ok'; })()"
+  },
+  {
+    "feature": "matches",
+    "caption": "The queue shows two supplied notices and affected notes.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length); return 'ok'; })()"
+  },
+  {
+    "feature": "manuscripts",
+    "caption": "Native links and Pandoc keys add manuscript review items.",
+    "note": "Manuscript.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length);m.contentEl.querySelector('.rrq-list').scrollIntoView(); return 'ok'; })()"
+  },
+  {
+    "feature": "notice-row",
+    "caption": "Read the title and fields supplied in the notice row.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length);m.contentEl.querySelector('details').open = true; m.contentEl.querySelector('details').scrollIntoView(); return 'ok'; })()"
+  },
+  {
+    "feature": "checked",
+    "caption": "Keep a checked state for one affected note and notice.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length);await p.mark(m.queue.items[0].id, true); await m.run(() => m.scan()); m.contentEl.querySelector('.rrq-list').scrollIntoView(); return 'ok'; })()"
+  },
+  {
+    "feature": "saved-map",
+    "caption": "Save a separate column map for this notice list with Pro.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length);p.pro.opts.http = async () => ({ status: 200, json: { data: { viewer: { login: 'demo-reader' }, user: { sponsorshipForViewerAsSponsor: { isActive: true, isOneTimePayment: false, tier: { name: '$5 a month', monthlyPriceInCents: 500 } } } } } }); app.secretStorage.setSecret('retraction-review-queue-github-token', 'gho_' + '0'.repeat(36)); await p.pro.refreshNow();await p.saveMap(m.path, m.map); m.draw(); return 'ok'; })()"
+  },
+  {
+    "feature": "report",
+    "caption": "The dated report is a local JSON snapshot.",
+    "note": "Welcome.md",
+    "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); await m.run(() => m.scan()); if (m.queue.items.length !== 8) throw new Error('Sample links not ready: '+m.queue.items.length);p.pro.opts.http = async () => ({ status: 200, json: { data: { viewer: { login: 'demo-reader' }, user: { sponsorshipForViewerAsSponsor: { isActive: true, isOneTimePayment: false, tier: { name: '$5 a month', monthlyPriceInCents: 500 } } } } } }); app.secretStorage.setSecret('retraction-review-queue-github-token', 'gho_' + '0'.repeat(36)); await p.pro.refreshNow();const path = await p.exportReport(m.queue, m.path, m.fileDate); window.__rrqReport = path; m.reportPath = path; m.reportText = await app.vault.adapter.read(path); m.draw(); m.contentEl.querySelector('.rrq-report').scrollIntoView(); return 'ok'; })()",
+    "after": "(async () => { const f = app.vault.getFileByPath(window.__rrqReport); if(f) await app.vault.delete(f); app.plugins.plugins['retraction-review-queue'].pro.signOut(); return 'ok'; })()"
+  },
+  {
+    "feature": "review-flow",
+    "caption": "Load, match, inspect, and check a local review item.",
+    "frames": [
+      {
+        "note": "Welcome.md",
+        "eval": "(async () => { const p = app.plugins.plugins['retraction-review-queue']; p.settings.checked = {}; await p.saveSettings(); p.pro.signOut(); p.openReview(); const m = p.modal; await m.ready; await m.run(async () => { await m.load('Retraction Review Queue/notices.csv'); }); return 'ok'; })()",
+        "hold": 1400
+      },
+      {
+        "eval": "(async () => { const m=app.plugins.plugins['retraction-review-queue'].modal; await m.run(() => m.scan()); return 'ok'; })()",
+        "hold": 1600
+      },
+      {
+        "eval": "(async () => { const m=app.plugins.plugins['retraction-review-queue'].modal; m.contentEl.querySelector('details').open=true; m.contentEl.querySelector('details').scrollIntoView(); return 'ok'; })()",
+        "hold": 1600
+      },
+      {
+        "eval": "(async () => { const p=app.plugins.plugins['retraction-review-queue'];const m=p.modal; await p.mark(m.queue.items[0].id,true);await m.run(()=>m.scan());m.contentEl.querySelector('.rrq-list').scrollIntoView(); return 'ok'; })()",
+        "hold": 1400
+      }
+    ]
+  }
+]

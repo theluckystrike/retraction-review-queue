@@ -1,0 +1,20 @@
+import { describe, expect, it, vi } from 'vitest';
+import { App } from 'obsidian-test-mocks/obsidian';
+import ReviewPlugin from '../src/main';
+import { normalizeSettings } from '../src/settings';
+import { bindPro, resetPro } from '../src/pro';
+import type { SponsorsManager } from '../src/license/index';
+import manifest from '../manifest.json';
+import { MAX_BYTES } from '../src/engine';
+const app = () => App.createConfigured__({ files: { 'Refs/Study.md': '# Reference' } });
+describe('local state and Pro boundary', () => {
+ it('repairs damaged settings', () => { expect(normalizeSettings({ checked: { a: true, b: 'yes' }, maps: { bad: { doi: -1 } } })).toEqual({ doiProperty: 'doi', citekeyProperty: 'citekey', checked: { a: true }, maps: {} }); });
+ it('refuses an oversized CSV before it reads file text', async () => { const p = new ReviewPlugin(app() as never, manifest as never); vi.spyOn(p.app.vault.adapter, 'stat').mockResolvedValue({ type: 'file', size: MAX_BYTES + 1, mtime: 0, ctime: 0 }); const read = vi.spyOn(p.app.vault.adapter, 'read'); await expect(p.readCsv('big.csv')).rejects.toThrow('20 MB'); expect(read).not.toHaveBeenCalled(); });
+ it('refuses paths outside the vault and hidden files', async () => { const p = new ReviewPlugin(app() as never, manifest as never); const stat = vi.spyOn(p.app.vault.adapter, 'stat'); for (const path of ['../list.csv', '/tmp/list.csv', '.obsidian/list.csv', 'Folder/../list.csv', 'Folder\\..\\list.csv', 'C:\\outside\\list.csv', '\\\\server\\list.csv']) await expect(p.readCsv(path)).rejects.toThrow('inside this vault'); expect(stat).not.toHaveBeenCalled(); });
+ it('uses the source file modification date for an old CSV', async () => { const p = new ReviewPlugin(app() as never, manifest as never); const old = Date.UTC(2020, 0, 1); vi.spyOn(p.app.vault.adapter, 'stat').mockResolvedValue({ type: 'file', size: 80, mtime: old, ctime: old }); vi.spyOn(p.app.vault.adapter, 'read').mockResolvedValue('DOI,Type,Date\n10.1234/abc,Correction,2019-12-01'); const result = await p.readCsv('old.csv'); expect(result.fileDate).toBe('2020-01-01T00:00:00.000Z'); expect(result.csv.rows).toHaveLength(1); });
+ it('loads free defaults', async () => { const p = new ReviewPlugin(app() as never, manifest as never); await p.loadSettings(); expect(p.settings.doiProperty).toBe('doi'); });
+ it('keeps checked state through load', async () => { const p = new ReviewPlugin(app() as never, manifest as never); await p.mark('item', true); await p.loadSettings(); expect(p.settings.checked.item).toBe(true); await p.mark('item', false); expect(p.settings.checked.item).toBeUndefined(); });
+ it('restores state when save fails', async () => { const p = new ReviewPlugin(app() as never, manifest as never); vi.spyOn(p, 'saveSettings').mockRejectedValue(new Error('Disk full')); await expect(p.mark('item', true)).rejects.toThrow('Disk full'); expect(p.settings.checked.item).toBeUndefined(); });
+ it('blocks Pro writes while signed out', async () => { resetPro(); const p = new ReviewPlugin(app() as never, manifest as never); const save = vi.spyOn(p, 'saveSettings'); const create = vi.spyOn(p.app.vault, 'create'); expect(await p.saveMap('list.csv', { doi: 0, type: 1, date: 2 })).toBe(false); expect(await p.exportReport({ items: [], warnings: [], matchedRows: 0 }, 'list.csv', 'old')).toBeNull(); expect(save).not.toHaveBeenCalled(); expect(create).not.toHaveBeenCalled(); });
+ it('saves separate maps and exports when the Sponsors check grants Pro', async () => { bindPro({ isPro: () => true, onChange: () => () => {} } as unknown as SponsorsManager); const p = new ReviewPlugin(app() as never, manifest as never); expect(await p.saveMap('a.csv', { doi: 0, type: 1, date: 2 })).toBe(true); expect(await p.saveMap('b.csv', { doi: 2, type: 0, date: 1 })).toBe(true); expect(Object.keys(p.settings.maps)).toEqual(['a.csv', 'b.csv']); const path = await p.exportReport({ items: [], warnings: ['Supplied list can be old.'], matchedRows: 0 }, 'a.csv', '2020-01-01'); const file = p.app.vault.getFileByPath(path!); expect(JSON.parse(await p.app.vault.read(file!)).fileDate).toBe('2020-01-01'); resetPro(); });
+});

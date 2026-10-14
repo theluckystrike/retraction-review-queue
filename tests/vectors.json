@@ -1,0 +1,1042 @@
+{
+  "slug": "retraction-review-queue",
+  "module": "retraction-review-queue/src/engine",
+  "function": "buildQueue",
+  "cases": [
+    {
+      "name": "DOI URL and case",
+      "function": "normalizeDoi",
+      "args": [
+        " https://doi.org/10.1234/ABC "
+      ],
+      "expected": "10.1234/abc"
+    },
+    {
+      "name": "Bare DOI",
+      "function": "normalizeDoi",
+      "args": [
+        "10.1234/ABC"
+      ],
+      "expected": "10.1234/abc"
+    },
+    {
+      "name": "DOI label",
+      "function": "normalizeDoi",
+      "args": [
+        "doi: 10.1234/abc"
+      ],
+      "expected": "10.1234/abc"
+    },
+    {
+      "name": "Legacy DOI URL",
+      "function": "normalizeDoi",
+      "args": [
+        "http://dx.doi.org/10.1234/AbC"
+      ],
+      "expected": "10.1234/abc"
+    },
+    {
+      "name": "Missing DOI",
+      "function": "normalizeDoi",
+      "args": [
+        "N/A"
+      ],
+      "expected": ""
+    },
+    {
+      "name": "Space in DOI",
+      "function": "normalizeDoi",
+      "args": [
+        "10.1234/a b"
+      ],
+      "expected": ""
+    },
+    {
+      "name": "Wrong DOI prefix",
+      "function": "normalizeDoi",
+      "args": [
+        "10.12/a"
+      ],
+      "expected": ""
+    },
+    {
+      "name": "Property array",
+      "function": "normalizeDoi",
+      "args": [
+        [
+          "10.1234/abc"
+        ]
+      ],
+      "expected": ""
+    },
+    {
+      "name": "Paper DOI precedes notice DOI",
+      "function": "defaultMap",
+      "args": [
+        [
+          "RetractionDOI",
+          "OriginalPaperDOI",
+          "NoticeType",
+          "Date"
+        ]
+      ],
+      "expected": {
+        "doi": 1,
+        "type": 2,
+        "date": 3
+      }
+    },
+    {
+      "name": "DOI fallback",
+      "function": "defaultMap",
+      "args": [
+        [
+          "DOI",
+          "Type",
+          "NoticeDate"
+        ]
+      ],
+      "expected": {
+        "doi": 0,
+        "type": 1,
+        "date": 2
+      }
+    },
+    {
+      "name": "Do not default to notice DOI",
+      "function": "defaultMap",
+      "args": [
+        [
+          "RetractionDOI",
+          "Type",
+          "Date"
+        ]
+      ],
+      "expected": {
+        "doi": -1,
+        "type": 1,
+        "date": 2
+      }
+    },
+    {
+      "name": "Column name case and spaces",
+      "function": "defaultMap",
+      "args": [
+        [
+          " originalpaperdoi ",
+          "notice type",
+          "notice date"
+        ]
+      ],
+      "expected": {
+        "doi": 0,
+        "type": 1,
+        "date": 2
+      }
+    },
+    {
+      "name": "BOM quoted comma and newline",
+      "function": "parseCsv",
+      "args": [
+        "\ufeffDOI,Title\r\n10.1234/abc,\"A, title\ncontinued\"\r\n"
+      ],
+      "expected": {
+        "headers": [
+          "DOI",
+          "Title"
+        ],
+        "rows": [
+          {
+            "cells": [
+              "10.1234/abc",
+              "A, title\ncontinued"
+            ],
+            "line": 2,
+            "warning": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escaped quote",
+      "function": "parseCsv",
+      "args": [
+        "DOI,Title\n10.1234/abc,\"A \"\"quote\"\"\""
+      ],
+      "expected": {
+        "headers": [
+          "DOI",
+          "Title"
+        ],
+        "rows": [
+          {
+            "cells": [
+              "10.1234/abc",
+              "A \"quote\""
+            ],
+            "line": 2,
+            "warning": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Malformed row warning",
+      "function": "parseCsv",
+      "args": [
+        "DOI,Type,Date\n10.1234/abc,Retraction"
+      ],
+      "expected": {
+        "headers": [
+          "DOI",
+          "Type",
+          "Date"
+        ],
+        "rows": [
+          {
+            "cells": [
+              "10.1234/abc",
+              "Retraction"
+            ],
+            "line": 2,
+            "warning": "Column count differs from header"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Unclosed quote warning",
+      "function": "parseCsv",
+      "args": [
+        "DOI,Type\n10.1234/abc,\"Retraction"
+      ],
+      "expected": {
+        "headers": [
+          "DOI",
+          "Type"
+        ],
+        "rows": [
+          {
+            "cells": [
+              "10.1234/abc",
+              "Retraction"
+            ],
+            "line": 2,
+            "warning": "Unclosed quoted field"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Empty file body",
+      "function": "parseCsv",
+      "args": [
+        "DOI,Type,Date\n"
+      ],
+      "expected": {
+        "headers": [
+          "DOI",
+          "Type",
+          "Date"
+        ],
+        "rows": []
+      }
+    },
+    {
+      "name": "Citation locator",
+      "function": "citationKeys",
+      "args": [
+        "[@Lee2020, 4]"
+      ],
+      "expected": [
+        "Lee2020"
+      ]
+    },
+    {
+      "name": "Several citations",
+      "function": "citationKeys",
+      "args": [
+        "[@Lee2020; -@Kim2021]"
+      ],
+      "expected": [
+        "Lee2020",
+        "Kim2021"
+      ]
+    },
+    {
+      "name": "Code excluded",
+      "function": "citationKeys",
+      "args": [
+        "`[@Lee2020]`\n```\n[@Kim2021]\n```"
+      ],
+      "expected": []
+    },
+    {
+      "name": "Plain text excluded",
+      "function": "citationKeys",
+      "args": [
+        "mail@example.com and @Lee2020"
+      ],
+      "expected": []
+    },
+    {
+      "name": "Key case significant",
+      "function": "citationKeys",
+      "args": [
+        "[@lee2020] [@Lee2020]"
+      ],
+      "expected": [
+        "lee2020",
+        "Lee2020"
+      ]
+    },
+    {
+      "name": "Reference DOI matches",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "Native linked manuscript",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          },
+          {
+            "path": "Manuscript.md",
+            "doi": null,
+            "citekey": null,
+            "text": "[[Refs/Study]]",
+            "links": [
+              "Refs/Study.md"
+            ]
+          }
+        ]
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          },
+          {
+            "id": "[\"Manuscript.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Manuscript.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Native link",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "Pandoc manuscript",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          },
+          {
+            "path": "Manuscript.md",
+            "doi": null,
+            "citekey": null,
+            "text": "[@Lee2020, 4]",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          },
+          {
+            "id": "[\"Manuscript.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Manuscript.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Pandoc @Lee2020",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "Correction and Retraction stay separate",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Correction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            },
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 3,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Correction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Correction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Correction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          },
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 3,
+            "reason": "Reference DOI",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 2
+      }
+    },
+    {
+      "name": "Unavailable DOI warning",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "N/A",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [],
+        "warnings": [
+          "Row 2: DOI is unavailable or invalid."
+        ],
+        "matchedRows": 0
+      }
+    },
+    {
+      "name": "Malformed row is not matched",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": "Column count differs from header"
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [],
+        "warnings": [
+          "Row 2: Column count differs from header."
+        ],
+        "matchedRows": 0
+      }
+    },
+    {
+      "name": "Same import keeps checked",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ],
+        {
+          "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]": true
+        }
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": true
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "New type is unchecked",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Correction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ],
+        {
+          "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]": true
+        }
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Correction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Correction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Correction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "New date is unchecked",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-02"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ],
+        {
+          "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]": true
+        }
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-02\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-02",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-02"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          }
+        ],
+        "warnings": [],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "Zero matches",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        []
+      ],
+      "expected": {
+        "items": [],
+        "warnings": [],
+        "matchedRows": 0
+      }
+    },
+    {
+      "name": "Ambiguous key excludes citation match",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": 0,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          },
+          {
+            "path": "Refs/Other.md",
+            "doi": "10.9999/xyz",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          },
+          {
+            "path": "Manuscript.md",
+            "doi": null,
+            "citekey": null,
+            "text": "[@Lee2020, 4]",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [
+          {
+            "id": "[\"Refs/Study.md\",\"10.1234/abc\",\"Retraction\",\"2026-10-01\"]",
+            "path": "Refs/Study.md",
+            "reference": "Refs/Study.md",
+            "doi": "10.1234/abc",
+            "type": "Retraction",
+            "date": "2026-10-01",
+            "row": [
+              "10.1234/abc",
+              "Retraction",
+              "2026-10-01"
+            ],
+            "line": 2,
+            "reason": "Reference DOI",
+            "checked": false
+          }
+        ],
+        "warnings": [
+          "Row 2: citekey Lee2020 has several reference notes; citation matches are excluded."
+        ],
+        "matchedRows": 1
+      }
+    },
+    {
+      "name": "Invalid column map",
+      "function": "buildQueue",
+      "args": [
+        {
+          "headers": [
+            "OriginalPaperDOI",
+            "Type",
+            "Date"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "10.1234/abc",
+                "Retraction",
+                "2026-10-01"
+              ],
+              "line": 2,
+              "warning": ""
+            }
+          ]
+        },
+        {
+          "doi": -1,
+          "type": 1,
+          "date": 2
+        },
+        [
+          {
+            "path": "Refs/Study.md",
+            "doi": "https://doi.org/10.1234/ABC",
+            "citekey": "Lee2020",
+            "text": "",
+            "links": []
+          }
+        ]
+      ],
+      "expected": {
+        "items": [],
+        "warnings": [
+          "Map the DOI, notice type, and date columns."
+        ],
+        "matchedRows": 0
+      }
+    }
+  ]
+}
