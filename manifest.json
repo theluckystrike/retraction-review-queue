@@ -1,11 +1,11 @@
 {
-  "id": "retraction-review-queue",
-  "name": "Retraction Review Queue",
-  "version": "1.0.0",
-  "minAppVersion": "1.13.4",
-  "description": "Match a local notice list to reference notes and linked manuscripts for review.",
-  "author": "Michael Lip",
-  "authorUrl": "https://github.com/theluckystrike",
-  "fundingUrl": "https://github.com/sponsors/theluckystrike",
-  "isDesktopOnly": false
+	"id": "retraction-review-queue",
+	"name": "Retraction Review Queue",
+	"version": "1.1.0",
+	"minAppVersion": "1.13.4",
+	"description": "Match a local notice list to reference notes and linked manuscripts for review.",
+	"author": "Michael Lip",
+	"authorUrl": "https://github.com/theluckystrike",
+	"fundingUrl": "https://github.com/sponsors/theluckystrike",
+	"isDesktopOnly": false
 }

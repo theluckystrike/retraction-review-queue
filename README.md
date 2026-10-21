@@ -50,7 +50,7 @@ Open “Supplied notice row” to read the source fields. The file date above th
 
 ## Install
 
-For manual installation, copy `main.js`, `manifest.json`, and `styles.css` from a release into `<vault>/.obsidian/plugins/retraction-review-queue/`. In Community plugins, enable Retraction Review Queue. Obsidian 1.13.4 or later is required. This source tree is prepared for release; directory publication is a separate step.
+For manual installation, copy `main.js`, `manifest.json`, and `styles.css` from a release into `<vault>/.obsidian/plugins/retraction-review-queue/`. In Community plugins, enable Retraction Review Queue. Obsidian 1.13.4 or later is required. To install from the community directory, open Settings, then Community plugins, then Browse, and search for Retraction Review Queue.
 
 ## Usage
 
@@ -63,6 +63,8 @@ For manual installation, copy `main.js`, `manifest.json`, and `styles.css` from 
 Run Match notes again after a note edit or after metadata resolves a new link. Load CSV again to read changed source rows. This release scans on request. It does not monitor changes to your CSV.
 
 ## Settings
+
+After a minor or major update, this plugin opens one What's new tab in the background. The tab and settings card suggest other NoteMods plugins and Zovo Chat and link to notemods.com for feedback ([privacy](https://notemods.com/privacy/)). The tab sends no data. Turn the tab off in Settings.
 
 The plugin settings tab has “DOI property” and “Citekey property”. They default to `doi` and `citekey`. Property names are case sensitive. Use a string value, not a list. The settings tab also has the GitHub Sponsors account controls. Checked state and saved maps are stored in plugin data. Vault sync software can copy this data if you configure it to sync the plugin folder.
 

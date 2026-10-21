@@ -5,11 +5,15 @@ import { SPONSORS, bindPro, resetPro, isPro } from './pro';
 import { buildQueue, parseCsv, MAX_BYTES, localReport, type Csv, type ColumnMap, type Note, type Queue } from './engine';
 import { normalizeSettings, ReviewSettingTab, type ReviewSettings } from './settings';
 import { ReviewModal } from './view';
+import { setupHello } from './hello/index';
+import WHATS_NEW from './whats-new.json';
 export default class ReviewPlugin extends Plugin {
  settings: ReviewSettings = normalizeSettings(null);
  pro: SponsorsManager | null = null;
  modal: ReviewModal | null = null;
  async onload(): Promise<void> {
+  // First: "What's new" reads its state before the settings load (packages/hello). It does not wait.
+  setupHello(this, WHATS_NEW);
   await this.loadSettings();
   const pro = createGitHubSponsors(this.app, this.manifest.id, SPONSORS, this);
   pro.init(); this.pro = pro; bindPro(pro);

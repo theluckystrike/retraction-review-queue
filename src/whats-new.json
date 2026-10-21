@@ -1,0 +1,27 @@
+{
+	"id": "retraction-review-queue",
+	"name": "Retraction Review Queue",
+	"version": "1.1.0",
+	"changes": [
+		"New Send feedback command. It opens a page where you can report a problem or suggest an idea."
+	],
+	"tip": "When you type the path of a vault CSV, separate its folders with forward slashes.",
+	"thanks": "Hi, I am Michael, a solo developer in Poland. Retraction Review Queue is one of over 100 small plugins that I make. Thank you for using it in your research notes.",
+	"related": [
+		{
+			"id": "research-source-review",
+			"name": "Research Source Review",
+			"blurb": "Check whether a source passage changed after you approved it for a note."
+		},
+		{
+			"id": "note-ris-export",
+			"name": "Note RIS Export",
+			"blurb": "Map reference note properties to fields in a local RIS file."
+		},
+		{
+			"id": "bibliography-path-audit",
+			"name": "Bibliography Path Audit",
+			"blurb": "Find invalid local bibliography paths saved in citation tool settings."
+		}
+	]
+}
