@@ -1,5 +1,11 @@
 # retraction-review-queue
 
+## 1.1.1
+
+### Patch Changes
+
+- The Pro notice for saved column maps and report export now has a Sponsor on GitHub button.
+
 ## 1.1.0
 
 ### Minor Changes

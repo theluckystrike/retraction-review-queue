@@ -1,7 +1,7 @@
 import { Notice, Plugin } from 'obsidian';
 import { createGitHubSponsors } from './license/github-obsidian';
 import type { SponsorsManager } from './license/index';
-import { SPONSORS, bindPro, resetPro, isPro } from './pro';
+import { SPONSORS, bindPro, resetPro, isPro, proNotice } from './pro';
 import { buildQueue, parseCsv, MAX_BYTES, localReport, type Csv, type ColumnMap, type Note, type Queue } from './engine';
 import { normalizeSettings, ReviewSettingTab, type ReviewSettings } from './settings';
 import { ReviewModal } from './view';
@@ -56,11 +56,11 @@ export default class ReviewPlugin extends Plugin {
   try { await this.saveSettings(); } catch (error) { if (previous) this.settings.checked[id] = previous; else delete this.settings.checked[id]; throw error; }
  }
  async saveMap(path: string, map: ColumnMap): Promise<boolean> {
-  if (!isPro()) { new Notice('Saved column maps need pro. Free imports work without pro.'); return false; }
+  if (!isPro()) { proNotice('Saved column maps need pro. Free imports work without pro.'); return false; }
   this.settings.maps[path] = { ...map }; await this.saveSettings(); return true;
  }
  async exportReport(queue: Queue, source: string, fileDate: string): Promise<string | null> {
-  if (!isPro()) { new Notice('Local report export needs pro. The review queue is free.'); return null; }
+  if (!isPro()) { proNotice('Local report export needs pro. The review queue is free.'); return null; }
   const now = new Date().toISOString(); const stamp = now.replace(/[:.]/g, '-');
   const file = await this.app.vault.create(`Retraction review ${stamp}.json`, localReport(queue, source, fileDate, now));
   new Notice(`Report saved to ${file.path}`); return file.path;

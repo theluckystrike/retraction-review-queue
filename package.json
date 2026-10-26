@@ -1,7 +1,6 @@
 {
 	"name": "retraction-review-queue",
-	"repository": {"type": "git", "url": "theluckystrike/retraction-review-queue.git"},
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"private": true,
 	"description": "Match a local notice list to reference notes and linked manuscripts for review.",
 	"main": "main.js",
