@@ -1,8 +1,9 @@
 {
 	"id": "retraction-review-queue",
 	"name": "Retraction Review Queue",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"changes": [
+		"The Pro notice of Retraction Review Queue now says that one payment turns on Pro in every NoteMods plugin.",
 		"The Pro notice for saved column maps and report export now has a Sponsor on GitHub button."
 	],
 	"tip": "When you type the path of a vault CSV, separate its folders with forward slashes.",
