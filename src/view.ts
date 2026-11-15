@@ -70,7 +70,7 @@ export class ReviewModal extends Modal {
   const list = el(root, 'div', '', 'rrq-list');
   for (const item of q.items.slice(0, 500)) {
    const card = el(list, 'article', '', 'rrq-item'); const head = el(card, 'div', '', 'rrq-item-head');
-   const label = el(head, 'label'); const check = el(label, 'input'); check.type = 'checkbox'; check.checked = item.checked; check.disabled = this.busy; check.setAttribute('aria-label', `Checked ${item.path}`); label.appendChild(document.createTextNode(' Checked'));
+   const label = el(head, 'label'); const check = el(label, 'input'); check.type = 'checkbox'; check.checked = item.checked; check.disabled = this.busy; check.setAttribute('aria-label', `Checked ${item.path}`); label.appendChild(label.doc.createTextNode(' Checked'));
    check.addEventListener('change', () => void this.run(async () => { await this.plugin.mark(item.id, check.checked); for (const i of q.items) if (i.id === item.id) i.checked = check.checked; }));
    const link = el(head, 'a', item.path, 'internal-link'); link.href = item.path;
    link.addEventListener('click', e => { e.preventDefault(); void this.run(async () => { await this.app.workspace.openLinkText(item.path, '', true); }); });
